@@ -94,7 +94,7 @@
       </div>
     </div>
     <!-- listmodal -->
-    <div class="my-5 row justify-content-center">
+    <div class="my-5 row justify-content-center" v-show="isShow">
       <div class="col-md-6">
         <table class="table">
           <thead>
@@ -167,7 +167,8 @@ export default {
       },
       cart: {},
       isLoading: false,
-      coupon_code: ""
+      coupon_code: '',
+      isShow: true
     };
   },
   methods: {
@@ -218,10 +219,28 @@ export default {
       this.$http.get(url).then(response => {
         console.log(response.data);
         vm.cart = response.data.data;
+        // console.log(response.data.data.carts.length);
+        if (response.data.data.carts.length >= 1) {
+          vm.isShow = true;
+        } else {
+          vm.isShow = false;
+        }
         vm.isLoading = false;
       });
     },
-    addCouponCode() {},
+    addCouponCode() {
+      const vm = this;
+      const url = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/coupon`;
+      const coupon = {
+        code:vm.coupon_code,
+      };
+      vm.isLoading = true;
+      this.$http.post(url,{ data : coupon }).then((response) => {
+        console.log(response);
+        vm.getCart();
+        vm.isLoading = false;
+      });
+    },
     removeCartItem(id) {
       const vm = this;
       const url = `${process.env.APIPATH}/api/${

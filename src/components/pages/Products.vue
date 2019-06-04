@@ -340,14 +340,6 @@ export default {
           console.log("刪除失敗");
         }
       });
-      // $("#delProductModal").modal("hide");
-      // const vm =this;
-      // const findKey = vm.products.find(function(item , index){
-      //     if (item.id = vm.tempProduct.title){
-      //         return true;
-      //     }
-      // });
-      // console.log(findKey.id);
     },
     //上傳圖片的程式碼放在元件內
     // uploadFile() {
