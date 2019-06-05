@@ -29,11 +29,31 @@
           <td class="text-muted" v-else>尚未付款</td>
           <td>
             <button class="btn btn-outline-primary btn-sm" @click="openModal(item)">編輯</button>
-            <button class="btn btn-outline-danger btn-sm">刪除</button>
           </td>
         </tr>
       </tbody>
     </table>
+    <!-- 分頁 -->
+    <nav aria-label="Page navigation example" class="d-flex justify-content-center">
+      <ul class="pagination">
+        <li class="page-item" :class="{'disabled':!pagination.has_pre}">
+          <a class="page-link" href="#" aria-label="Previous"
+           @click.prevent="getOrderList(pagination.current_page -1)">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        <li class="page-item" v-for="page in pagination.total_pages" :key="page"
+        :class="{'active':pagination.current_page === page}">
+          <a class="page-link" href="#" @click.prevent="getOrderList(page)">{{page}}</a>
+        </li>
+
+        <li class="page-item" :class="{'disabled':!pagination.has_next}">
+          <a class="page-link" href="#" aria-label="Next" @click.prevent="getOrderList(pagination.current_page +1)">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
     <!-- 編輯 -->
     <div
       class="modal fade"
@@ -57,52 +77,64 @@
             <div class="row">
               <div class="col-sm-8">
                 <div class="form-row">
-                  <div class="form-group col-md-6">
+                  <!-- <div class="form-group col-md-6">
                     <label for="origin_price">購買時間</label>
                     <input
                       type="number"
                       class="form-control"
                       id="origin_price"
                       v-model="tempOrderList.create_at"
-                      placeholder="請輸入原價"
+                      placeholder
                     >
-                  </div>
+                  </div>-->
                   <div class="form-group col-md-6">
                     <label for="price">Email</label>
                     <input
-                      type="number"
+                      type="mail"
                       class="form-control"
                       id="price"
                       v-model="tempOrderList.user.email"
-                      placeholder="請輸入售價"
+                      placeholder
                     >
                   </div>
                 </div>
                 <hr>
-                                  <div class="form-row">
+                <div class="form-row">
                   <div class="form-group">
                     <label for="comment">購買款項</label>
-                    <textarea name id="comment" class="form-control" cols="30" rows="10"></textarea>
+                    <ul class="list-unstyled">
+                      <li v-for="(product, i) in tempOrderList.products" :key="i">
+                        {{ product.product.title }}數量：
+                        <input
+                          type="number"
+                          class="form-control"
+                          id="price"
+                          v-model="product.qty"
+                          placeholder
+                        >
+                        {{ product.product.unit }}
+                      </li>
+                    </ul>
                   </div>
                 </div>
                 <hr>
-                  <div class="form-group col-md-6">
-                    <label for="origin_price">應付金額</label>
-                    <input
-                      type="number"
-                      class="form-control"
-                      id="origin_price"
-                      v-model="tempOrderList.total"
-                      placeholder="請輸入原價"
-                    >
-                  </div>
-                <hr>
+                <div class="form-group col-md-6">
+                  <label for="origin_price">應付金額</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="origin_price"
+                    v-model="tempOrderList.total"
+                    placeholder
+                  >
+                </div>
+                
               </div>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">取消</button>
-            <button type="button" class="btn btn-primary">確認</button>
+            <button type="button" class="btn btn-primary" @click="updateOrder">確認</button>
           </div>
         </div>
       </div>
@@ -117,10 +149,9 @@ export default {
   data() {
     return {
       OrderList: {},
-      tempOrderList: {        
-        user:{
-          email:'',
-        },
+      pagination: {},
+      tempOrderList: {
+        user: {}
       }
     };
   },
@@ -135,15 +166,31 @@ export default {
         console.log(response.data);
         // vm.isLoading = false;
         vm.OrderList = response.data.orders;
-        // vm.pagination = response.data.pagination;
+        vm.pagination = response.data.pagination;
       });
     },
     openModal(item) {
       const vm = this;
       // this.isNew = true;
-      this.tempOrderList = Object.assign({}, item);
+      vm.tempOrderList = Object.assign({}, item);
       // this.isNew = false;
       $("#orderModal").modal("show");
+    },
+    updateOrder() {
+      const vm = this;
+      let api = `${process.env.APIPATH}/api/${
+        process.env.CUSTOMPATH
+      }/admin/order/${vm.tempOrderList.id}`;
+      this.$http.put(api, { data: vm.tempOrderList }).then(response => {
+        if (response.data.success) {
+          $("#orderModal").modal("hide");
+          vm.getOrderList();
+        } else {
+          $("#orderModal").modal("hide");
+          vm.getOrderList();
+          console.log("新增失敗");
+        }
+      });
     }
   },
   created() {
