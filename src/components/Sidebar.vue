@@ -13,8 +13,14 @@
         <ul class="nav flex-column mb-2">
           <li class="nav-item">
             <router-link to="/admin/products" class="nav-link">
-            <i class="fas fa-box-open"></i>
-            產品列表
+              <i class="fas fa-box-open"></i>
+              產品列表
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <router-link to="/admin/coupon" class="nav-link">
+              <i class="fas fa-gift"></i>
+              優惠券
             </router-link>
           </li>
         </ul>
