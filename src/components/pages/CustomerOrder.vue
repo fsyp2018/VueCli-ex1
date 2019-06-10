@@ -178,10 +178,13 @@
           <input
             type="tel"
             class="form-control"
+            name="tel"
             id="usertel"
             v-model="form.user.tel"
+            v-validate="'required'"
             placeholder="請輸入電話"
           >
+          <span class="text-danger" v-if="errors.has('tel')">電話必須輸入</span>
         </div>
 
         <div class="form-group">
@@ -192,9 +195,10 @@
             name="address"
             id="useraddress"
             v-model="form.user.address"
+            v-validate="'required'"
             placeholder="請輸入地址"
           >
-          <span class="text-danger">地址欄位不得留空</span>
+          <span class="text-danger" v-if="errors.has('address')">地址必須輸入</span>
         </div>
 
         <div class="form-group">
@@ -219,7 +223,6 @@
 <script>
 //目前不認識'$'所以要加入import jquery
 import $ from "jquery";
-
 export default {
   data() {
     return {
@@ -285,8 +288,8 @@ export default {
       });
     },
     getCart() {
-      const url = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart`;
       const vm = this;
+      const url = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/cart`;      
       vm.isLoading = true;
       this.$http.get(url).then(response => {
         console.log(response.data);
@@ -333,7 +336,10 @@ export default {
       this.$validator.validate().then((result) => {
         if (result) {
                 this.$http.post(url, { data: order }).then(response => {
-        console.log('訂單已建立',response);       
+        console.log('訂單已建立',response);
+        if (response.data.success) {
+          vm.$router.push(`/customer_checkout/${response.data.orderId}`);
+        }       
         vm.isShow = false;
         vm.isLoading = false;
         
@@ -345,10 +351,8 @@ export default {
         }
       });
       //-----------------------
-
     }
   },
-
   created() {
     this.getProducts();
     this.getCart();
